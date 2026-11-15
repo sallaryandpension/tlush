@@ -71,7 +71,8 @@
   /* The whole path. Refuses rather than guesses: a scanned page, a page with no readable text but with print on it,
      or an ID number that can't be found in the file at all, which means the text can't be trusted. */
   async function run(files, input, onProgress, options) {
-    const payslip = !!(options && options.doc === "payslip");
+    /* A payslip the template missed, and any other document: nothing refused, an unreadable page marked instead. */
+    const payslip = !!(options && P.LENIENT.includes(options.doc));
     const { docs, pages } = await read(files);
     try {
       const decision = P.decide(pages, input, options);
@@ -155,14 +156,19 @@
   const say = (text, error) => { $("status").textContent = text; $("status").classList.toggle("error", !!error); };
   const hasTicket = () => { try { return !!global.sessionStorage.getItem("ticket"); } catch (e) { return false; } };
 
-  /* The same page serves a payslip the template didn't recognise (pension.html?doc=payslip): the payslip wording,
-     the payslip labels, nothing refused, and the result goes on as payslips. */
-  const DOC = new URLSearchParams(global.location.search).get("doc") === "payslip" ? "payslip" : "pension";
-  document.querySelectorAll("[data-doc]").forEach((el) => { el.hidden = el.dataset.doc !== DOC; });
-  if (DOC === "payslip") {
-    document.title = "תלוש בלי פרטים מזהים";
-    $("want-pension").checked = new URLSearchParams(global.location.search).get("pension") === "1";
-  }
+  /* One page for four documents, by ?doc= (pension.html explains them). Each goes to the case as its own kind, so
+     the operator gets one file per kind. A payslip starts the case afresh; the others join what is waiting. */
+  const DOCS = {
+    pension: { kind: "pension", title: "דוח מהקופה בלי פרטים מזהים", file: "דוח_קופה_בלי_פרטים_מזהים.pdf" },
+    keren: { kind: "keren", title: "דוח מקרן ההשתלמות בלי פרטים מזהים", file: "קרן_השתלמות_בלי_פרטים_מזהים.pdf" },
+    payslip: { kind: "payslip", title: "תלוש בלי פרטים מזהים", file: "תלוש_בלי_פרטים_מזהים.pdf" },
+    other: { kind: "other", title: "מסמך נוסף בלי פרטים מזהים", file: "מסמך_בלי_פרטים_מזהים.pdf" },
+  };
+  const asked = new URLSearchParams(global.location.search).get("doc");
+  const DOC = Object.prototype.hasOwnProperty.call(DOCS, asked) ? asked : "pension";
+  document.querySelectorAll("[data-doc]").forEach((el) => { el.hidden = !el.dataset.doc.split(" ").includes(DOC); });
+  document.title = DOCS[DOC].title;
+  if (DOC === "payslip") $("want-pension").checked = new URLSearchParams(global.location.search).get("pension") === "1";
 
   function terms() {
     return {
@@ -284,7 +290,7 @@
     clearShown();
     pages.forEach((p, i) => $("pages").append(sheet(p, i)));
     setMarking(false);
-    $("unknown").hidden = known || DOC === "payslip";
+    $("unknown").hidden = known || !["pension", "keren"].includes(DOC);   // only reports have the circular's layout
     $("untyped").hidden = typed;
     $("id-missing").hidden = !idMissing;
     $("summary").textContent = summary();
@@ -359,7 +365,7 @@
     const list = await finalPages(pages);
     const a = document.createElement("a");
     a.href = URL.createObjectURL(B.build(list));
-    a.download = DOC === "payslip" ? "תלוש_בלי_פרטים_מזהים.pdf" : "דוח_קופה_בלי_פרטים_מזהים.pdf";
+    a.download = DOCS[DOC].file;
     a.click();
     URL.revokeObjectURL(a.href);
   });
@@ -372,7 +378,7 @@
         await global.Handoff.put(made.map((blob) => ({ blob, kind: "payslip" })));
         if ($("want-pension").checked) { global.location.href = "pension.html"; return; }
       } else {
-        await global.Handoff.add(made.map((blob) => ({ blob, kind: "pension" })));
+        await global.Handoff.add(made.map((blob) => ({ blob, kind: DOCS[DOC].kind })));
       }
       /* Without an entry code the file waits in the browser while she enters it, then she goes on to sending. */
       global.location.href = hasTicket() ? "send.html" : "index.html?next=send";
@@ -388,23 +394,24 @@
   $("want-pension").addEventListener("change", nextLabel);
   nextLabel();
 
-  /* Payslips made on the payslip page wait here, and are sent together with this report. */
-  if (DOC === "pension") global.Handoff.count().then((n) => {
+  /* Files made earlier (payslips, or documents added from the sending page) wait here, and go with this one. */
+  if (DOC !== "payslip") global.Handoff.count().then((n) => {
     if (n) {
-      $("waiting").textContent = `התלושים שהכנת ממתינים (${n === 1 ? "חלק אחד" : `${n} חלקים`}), ויישלחו יחד עם הדוח הזה, לאותו תיק. `;
-      /* She ticked the pension check but has no report from the fund after all: the payslips go on their own. */
+      $("waiting").textContent = `קבצים שכבר הכנת ממתינים (${n === 1 ? "חלק אחד" : `${n} חלקים`}), ויישלחו יחד עם המסמך הזה, לאותו תיק. `;
+      /* She has nothing to add after all: what is waiting goes on its own. */
       const skip = document.createElement("a");
       skip.href = hasTicket() ? "send.html" : "index.html?next=send";
-      skip.textContent = "אין לי דוח מהקופה: שליחת התלושים בלבד";
-      /* The payslips were the wrong file: they are dropped here, and only the report goes. */
+      skip.textContent = "אין לי מסמך להוסיף: המשך לשליחה";
+      /* What waits was the wrong file: it is dropped here, and only this document goes. */
       const drop = document.createElement("button");
       drop.type = "button";
       drop.className = "secondary";
-      drop.textContent = "הסרת התלושים הממתינים";
+      drop.textContent = "הסרת הקבצים הממתינים";
       drop.addEventListener("click", async () => {
-        if (!global.confirm("להסיר את התלושים שהכנת? הם יימחקו מהדפדפן, ורק הדוח מהקופה יישלח.")) return;
+        if (!global.confirm("להסיר את הקבצים שכבר הכנת? הם יימחקו מהדפדפן, ויישלח רק המסמך שבעמוד הזה.")) return;
         await global.Handoff.clear();
-        $("waiting").textContent = "התלושים הוסרו. יישלח רק הדוח מהקופה.";
+        try { global.sessionStorage.removeItem("draftCase"); } catch (e) { /* nothing kept */ }
+        $("waiting").textContent = "הקבצים הוסרו. יישלח רק המסמך שבעמוד הזה.";
       });
       $("waiting").append(skip, " · ", drop);
       $("waiting").hidden = false;

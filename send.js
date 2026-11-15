@@ -90,6 +90,7 @@
     $("back").hidden = true; // Leaving mid-send would cut the upload. A failure brings it back below.
     $("saved").disabled = true;
     $("cancel-box").hidden = true;
+    $("add-box").hidden = true;
     $("progress").hidden = false;
     $("progress").max = blobs.length;
     try {
@@ -108,7 +109,7 @@
       $("progress").value = blobs.length;
       tell("done");
       blobs = [];
-      try { global.sessionStorage.removeItem("resubmit"); } catch (e) { /* nothing kept */ }
+      try { ["resubmit", "draftCase"].forEach((k) => global.sessionStorage.removeItem(k)); } catch (e) { /* nothing kept */ }
       $("step-code").hidden = true;
       $("step-send").hidden = true;
       $("done").hidden = false;
@@ -137,9 +138,11 @@
     }
     /* An upload again, after an error report: the same case and key from her link, so the report comes to the same
        place. Otherwise a new case. */
-    let again = null;
+    let again = null, draft = null;
     try { again = C.parseCode(global.sessionStorage.getItem("resubmit") || ""); } catch (e) { again = null; }
-    const made = again || C.makeCase();
+    /* She went to add a document and came back: the same case and link as before, not a new one. */
+    try { draft = C.parseCode(global.sessionStorage.getItem("draftCase") || ""); } catch (e) { draft = null; }
+    const made = again || draft || C.makeCase();
     session = Object.assign(made, { link: reportLink(made.caseId, made.reportKey), again: !!again });
     describe();
     showLink();
@@ -150,24 +153,49 @@
   }
 
   /* What is about to go, by kind, and the buttons to take a wrong file out before anything is sent. */
-  const NAMES = { payslip: "תלושים", pension: "דוח מהקופה" };
+  const NAMES = { payslip: "תלושים", pension: "דוח מהקופה", keren: "דוח מקרן ההשתלמות", other: "מסמכים נוספים" };
+  const THE = { payslip: "התלושים", pension: "הדוח מהקופה", keren: "הדוח מקרן ההשתלמות", other: "המסמכים הנוספים" };
+  const kindOf = (b) => b.kind || "payslip";
   function describe() {
     const megabytes = blobs.reduce((sum, b) => sum + b.size, 0) / (1024 * 1024);
-    const kinds = [...new Set(blobs.map((b) => b.kind || "payslip"))];
-    const what = kinds.map((k) => NAMES[k] || "קובץ").join(" ו");
+    const kinds = [...new Set(blobs.map(kindOf))];
+    const what = kinds.map((k) => NAMES[k] || "קובץ").join(", ");
     const parts = blobs.length === 1 ? "" : `, ב-${blobs.length} חלקים`;
-    $("summary").textContent = `מוכן לשליחה: ${what}, ${megabytes.toFixed(1)}MB${parts}. הקבצים יוצפנו לפני שהם יוצאים מהמחשב.`;
-    const both = kinds.length > 1 && !uploadToken;   // once sending began, the number of parts is fixed
-    $("drop-pension").hidden = !both;
-    $("drop-payslip").hidden = !both;
+    $("summary").textContent = `מוכן לשליחה: ${what}. ${megabytes.toFixed(1)}MB${parts}. הקבצים יוצפנו לפני שהם יוצאים מהמחשב.`;
+    /* Once sending began, the number of parts is fixed: nothing more can be taken out or added. */
+    $("drop-kinds").textContent = "";
+    if (kinds.length > 1 && !uploadToken) {
+      for (const k of kinds) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = `הסרת ${THE[k] || "הקובץ"} מהשליחה`;
+        b.addEventListener("click", () => dropKind(k));
+        $("drop-kinds").append(b);
+      }
+    }
+    $("add-box").hidden = !!uploadToken;
   }
 
   function dropKind(kind) {
-    const name = NAMES[kind];
-    if (!global.confirm(`להסיר את ה${name} מהשליחה? ${kind === "pension" ? "התלושים" : "הדוח מהקופה"} יישלח לבד.`)) return;
-    blobs = blobs.filter((b) => (b.kind || "payslip") !== kind);
+    const name = THE[kind] || "הקובץ";
+    if (!global.confirm(`להסיר את ${name} מהשליחה? שאר הקבצים יישלחו בלעדיו.`)) return;
+    blobs = blobs.filter((b) => kindOf(b) !== kind);
     describe();
-    say(`ה${name} הוסר. אפשר לשלוח את השאר, או לבטל.`);
+    say(`הוסר מהשליחה: ${name}. אפשר לשלוח את השאר, או לבטל.`);
+  }
+
+  /* Another document for the same case: what is here goes back to the browser's database, the case is kept for
+     her return, and she prepares the document on its page. */
+  async function addDoc(doc) {
+    try {
+      await global.Handoff.put(blobs.map((blob) => ({ blob, kind: kindOf(blob) })));
+      if (!session.again) global.sessionStorage.setItem("draftCase", `${session.caseId}.${session.reportKey}`);
+    } catch (e) {
+      say("לא הצלחנו לשמור את הקבצים בדפדפן. ייתכן שהדפדפן במצב פרטי.", true);
+      return;
+    }
+    blobs = [];   // they wait in the database now, so leaving this page loses nothing
+    global.location.href = `pension.html?doc=${doc}`;
   }
 
   /* Nothing has gone yet, or a sending broke off: either way she can stop. The entry code is kept until sending
@@ -180,7 +208,7 @@
     if (!global.confirm(text)) return;
     /* Cancelling an upload again keeps the case: her link must not be told the case is gone. */
     if (!session.again) tell("cancelled");
-    try { global.sessionStorage.removeItem("resubmit"); } catch (e) { /* nothing kept */ }   // the next try is a new case
+    try { ["resubmit", "draftCase"].forEach((k) => global.sessionStorage.removeItem(k)); } catch (e) { /* nothing kept */ }   // the next try is a new case
     blobs = [];
     global.location.href = "blank.html";
   }
@@ -207,8 +235,7 @@
   });
   $("send").addEventListener("click", run);
   $("cancel").addEventListener("click", cancel);
-  $("drop-pension").addEventListener("click", () => dropKind("pension"));
-  $("drop-payslip").addEventListener("click", () => dropKind("payslip"));
+  ["pension", "keren", "other"].forEach((doc) => $(`add-${doc}`).addEventListener("click", () => addDoc(doc)));
   $("retry").addEventListener("click", run);
   $("download").addEventListener("click", saveAsText);
   $("copy").addEventListener("click", async () => {

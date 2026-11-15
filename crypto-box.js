@@ -61,7 +61,7 @@
   const reportLabel = (caseId) => encoder.encode(`TCR1|${caseId}`);
 
   /* What a part holds, so the operator's tool keeps the payslips and the fund's report as separate files. */
-  const KINDS = ["payslip", "pension"];
+  const KINDS = ["payslip", "pension", "keren", "other"];
 
   /* pdf: Uint8Array. publicKey: the operator's RSA public key as JWK. kind: one of KINDS, or left out. */
   async function sealPart({ pdf, caseId, reportKey, part, parts, publicKey, kind }) {

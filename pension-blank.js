@@ -38,6 +38,8 @@
     // Not a bare "טלפון": that is also a payment ("החזר הוצאות טלפון", its differences), which the check needs.
     "מספר טלפון", "מס' טלפון", "טלפון נייד", "טלפון בבית",
   ].map(norm);
+  /* Documents with no fixed layout: all labels, nothing refused. */
+  const LENIENT = ["payslip", "other"];
   /* "ת.ז." normalises to "ת.ז." and would match inside ordinary words rarely; the short ones need a word edge. */
   const SHORT = new Set(["ת.ז.", "ת.ז", "מען", "מיקוד", 'דוא"ל', "בנק", "סניף"].map(norm));
 
@@ -360,7 +362,9 @@
      options.doc "payslip": a payslip the template didn't recognise. Its labels are used, and nothing is refused:
      a page with no readable text gets no suggestion and is marked, so she blacks it out herself. */
   function decide(pages, input, options) {
-    const payslip = !!(options && options.doc === "payslip");
+    /* "other" (any document she adds) is handled like a payslip the template missed: every label we know, and
+       nothing refused. "keren" (a training fund) has the same circular and labels as "pension". */
+    const payslip = !!(options && LENIENT.includes(options.doc));
     const labelList = payslip ? [...PAYSLIP_LABELS, ...LINE_LABELS] : LINE_LABELS;
     const terms = prepareTerms(input);
     const state = { inBlock: false };
@@ -386,5 +390,5 @@
     return { pages: result, labels, refused, known: labels > 0, typed };
   }
 
-  global.PensionBlank = { norm, validId, hasId, patternOf, prepareTerms, termHit, toLines, page, imageBoxes, decide };
+  global.PensionBlank = { norm, validId, hasId, patternOf, prepareTerms, termHit, toLines, page, imageBoxes, decide, LENIENT };
 })(window);

@@ -250,6 +250,8 @@
     }
   });
 
-  /* Anything left from an earlier visit that never reached the sending page is removed. */
+  /* Anything left from an earlier visit that never reached the sending page is removed, and the next sending is a
+     new case. */
   global.Handoff.clear().catch(() => {});
+  try { global.sessionStorage.removeItem("draftCase"); } catch (e) { /* nothing kept */ }
 })(window);

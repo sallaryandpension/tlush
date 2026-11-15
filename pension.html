@@ -4,32 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- connect-src 'none' stays on this page for good, as on blank.html. tools/build_site.py refuses to build without it.
-     The same page serves two documents: the fund's report (default) and, as pension.html?doc=payslip, a payslip the
-     payslip page didn't recognise. Elements marked data-doc show only for their document. -->
+     One page for every document but the recognised payslip, by ?doc=:
+       pension (default)  a report from a pension fund or provident fund
+       keren              a report from a training fund (קרן השתלמות); the same circular, the same labels
+       payslip            a payslip the payslip page didn't recognise
+       other              any other document she wants to add (Form 106, an employment letter...)
+     data-doc lists the documents an element shows for, separated by spaces. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self' blob:; style-src 'self'; connect-src 'none'; img-src 'self' data: blob:; font-src 'none'; form-action 'none'; base-uri 'none'">
-<title>דוח מהקופה בלי פרטים מזהים</title>
+<title>מסמך בלי פרטים מזהים</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
   <div class="brandbar"><img src="logo.svg" alt="" width="34" height="34"><span>בדיקת תלוש למורים</span></div>
   <h1 data-doc="pension">דוח מהקופה בלי פרטים מזהים</h1>
+  <h1 data-doc="keren" hidden>דוח מקרן ההשתלמות בלי פרטים מזהים</h1>
   <h1 data-doc="payslip" hidden>תלוש בלי פרטים מזהים</h1>
-  <p data-doc="pension">לדוח שנתי או רבעוני מקרן הפנסיה, מקופת הגמל או מקרן ההשתלמות. העמוד יוצר PDF חדש, והפרטים המזהים בו מושחרים. <strong>הקובץ המקורי והפרטים שתקלידי לא נשלחים לשום מקום.</strong></p>
+  <h1 data-doc="other" hidden>מסמך נוסף בלי פרטים מזהים</h1>
+  <p data-doc="pension">לדוח שנתי או רבעוני מקרן הפנסיה או מקופת הגמל. העמוד יוצר PDF חדש, והפרטים המזהים בו מושחרים. <strong>הקובץ המקורי והפרטים שתקלידי לא נשלחים לשום מקום.</strong></p>
+  <p data-doc="keren" hidden>לדוח שנתי או רבעוני מקרן ההשתלמות. העמוד יוצר PDF חדש, והפרטים המזהים בו מושחרים. <strong>הקובץ המקורי והפרטים שתקלידי לא נשלחים לשום מקום.</strong></p>
   <p data-doc="payslip" hidden>העמוד יוצר PDF חדש, והפרטים המזהים בו מושחרים. <strong>הקובץ המקורי והפרטים שתקלידי לא נשלחים לשום מקום.</strong></p>
-  <ol class="stepper" aria-label="שלבי הבדיקה"><li class="done"><a href="prepare.html">הכנה</a></li><li class="done"><a href="register.html">הרשמה</a></li><li class="done"><a href="index.html">כניסה</a></li><li aria-current="step"><span data-doc="pension">ריקון הדוח</span><span data-doc="payslip" hidden>ריקון התלוש</span></li><li>שליחה</li><li>הדוח</li></ol>
+  <p data-doc="other" hidden>כל מסמך שיכול לעזור לבדיקה: טופס 106, אישור העסקה, מכתב על דרגה, ותק או גמול, אישור לימודים. העמוד יוצר PDF חדש, והפרטים המזהים בו מושחרים. <strong>הקובץ המקורי והפרטים שתקלידי לא נשלחים לשום מקום.</strong></p>
+  <ol class="stepper" aria-label="שלבי הבדיקה"><li class="done"><a href="prepare.html">הכנה</a></li><li class="done"><a href="register.html">הרשמה</a></li><li class="done"><a href="index.html">כניסה</a></li><li aria-current="step"><span data-doc="pension keren other">ריקון המסמך</span><span data-doc="payslip" hidden>ריקון התלוש</span></li><li>שליחה</li><li>הדוח</li></ol>
 </header>
 <main>
-  <p class="back-link" data-doc="pension"><a href="blank.html">→ חזרה לתלוש (את התלושים צריך לבחור שוב)</a></p>
+  <p class="back-link" data-doc="pension keren other"><a href="blank.html">→ לעמוד התלוש (את התלושים צריך לבחור שוב)</a></p>
   <p class="back-link" data-doc="payslip" hidden><a href="blank.html">→ חזרה לעמוד התלוש</a></p>
   <div class="notice" data-doc="payslip" hidden>
     <p><strong>לא הצלחנו לזהות את התלוש באופן אוטומטי.</strong> לכן נציע כאן מה להסתיר, לפי הכותרות בתלוש ולפי הפרטים שתמלאי, ואת תשלימי ותתקני בעצמך. אפשר גם לא למלא כלום ולהסתיר הכול בעצמך.</p>
+  </div>
+  <div class="notice" data-doc="other" hidden>
+    <p><strong>במסמך כזה אין לנו תבנית קבועה.</strong> נציע מה להסתיר לפי כותרות נפוצות ולפי הפרטים שתמלאי, ואת תשלימי ותתקני בעצמך.</p>
   </div>
   <p class="notice" id="waiting" hidden></p>
 
   <section>
     <h2>1. מה צריך להסתיר (לא חובה)</h2>
-    <p class="hint"><span data-doc="pension">אם תמלאי את הפרטים האלה, העמוד ימצא אותם בדוח ויציע להסתיר כל מקום שבו הם מופיעים.</span><span data-doc="payslip" hidden>אם תמלאי את הפרטים האלה, העמוד ימצא אותם בתלוש ויציע להסתיר כל מקום שבו הם מופיעים.</span> הם נשארים במכשיר הזה בלבד.</p>
+    <p class="hint">אם תמלאי את הפרטים האלה, העמוד ימצא אותם במסמך ויציע להסתיר כל מקום שבו הם מופיעים. הם נשארים במכשיר הזה בלבד.</p>
     <p class="hint"><strong>לא חייבים למלא אף שדה.</strong> אפשר להשאיר הכול ריק, ולהסתיר את הפרטים בעצמך בשלב 3, עם "סימון ידני".</p>
     <div class="fields">
       <label>מספר תעודת זהות (לא חובה)
@@ -38,24 +49,28 @@
       <label>שם פרטי ושם משפחה (לא חובה)
         <input type="text" id="name" autocomplete="off" maxlength="80">
       </label>
-      <label><span data-doc="pension">שמות נוספים (לא חובה): שם משפחה קודם, בן או בת הזוג, הילדים</span><span data-doc="payslip" hidden>שמות נוספים (לא חובה): שם משפחה קודם, שם בית הספר, שם פקיד השכר</span>
+      <label><span data-doc="pension keren">שמות נוספים (לא חובה): שם משפחה קודם, בן או בת הזוג, הילדים</span><span data-doc="payslip other" hidden>שמות נוספים (לא חובה): שם משפחה קודם, שם בית הספר, שם פקיד השכר</span>
         <input type="text" id="others" autocomplete="off" maxlength="300">
       </label>
-      <label><span data-doc="pension">מספרי חשבון או פוליסה (לא חובה), מופרדים בפסיק</span><span data-doc="payslip" hidden>מספר עובד, מספר חשבון בנק (לא חובה), מופרדים בפסיק</span>
+      <label><span data-doc="pension keren">מספרי חשבון או פוליסה (לא חובה), מופרדים בפסיק</span><span data-doc="payslip other" hidden>מספר עובד, מספרי חשבון (לא חובה), מופרדים בפסיק</span>
         <input type="text" id="accounts" dir="ltr" autocomplete="off" maxlength="300">
       </label>
     </div>
   </section>
 
   <section>
-    <h2 data-doc="pension">2. בחרי את הדוח</h2>
+    <h2 data-doc="pension keren">2. בחרי את הדוח</h2>
     <h2 data-doc="payslip" hidden>2. בחרי שוב את התלוש</h2>
+    <h2 data-doc="other" hidden>2. בחרי את המסמך</h2>
     <p class="hint" data-doc="pension">דוח שהורדת מאתר הקופה כ-PDF. דוח סרוק או צילום לא מתאים לעמוד הזה.</p>
+    <p class="hint" data-doc="keren" hidden>דוח שהורדת מהאזור האישי של קרן ההשתלמות כ-PDF. דוח סרוק או צילום לא מתאים לעמוד הזה.</p>
     <p class="hint" data-doc="payslip" hidden>אותו קובץ שבחרת בעמוד הקודם. בעמוד סרוק או מצולם לא נוכל להציע מה להסתיר, ותסמני בעצמך.</p>
+    <p class="hint" data-doc="other" hidden>עדיף PDF שהורדת. אפשר גם מסמך סרוק: בעמוד כזה לא נוכל להציע מה להסתיר, ותסמני בעצמך.</p>
     <label class="dropzone">
       <input type="file" id="pdf" accept="application/pdf" multiple>
-      <span class="dz-title" data-doc="pension">בחירת קובצי הדוח (PDF)</span>
+      <span class="dz-title" data-doc="pension keren">בחירת קובצי הדוח (PDF)</span>
       <span class="dz-title" data-doc="payslip" hidden>בחירת קובצי התלוש (PDF)</span>
+      <span class="dz-title" data-doc="other" hidden>בחירת המסמך (PDF)</span>
       <span class="dz-hint" id="dz-hint">אפשר לבחור כמה קבצים יחד. הם נפתחים רק במחשב הזה</span>
     </label>
     <p id="status" role="status" aria-live="polite"></p>
@@ -65,7 +80,7 @@
     <h2>3. בדקי את ההצעה שלנו, ותקני אותה</h2>
     <div class="notice">
       <p><strong>האחריות להסתיר את הפרטים המזהים היא שלך.</strong> לפני השליחה צריך שבכל העמודים יהיו מוסתרים:</p>
-      <ul class="points" data-doc="pension">
+      <ul class="points" data-doc="pension keren">
         <li>שם, שם משפחה קודם ומספר תעודת זהות</li>
         <li>כתובת, טלפון ודוא"ל</li>
         <li>תאריך לידה, מצב משפחתי ומין</li>
@@ -73,19 +88,20 @@
         <li>שם המעסיק, ושם הסוכן או היועץ</li>
         <li>מספרי חשבון, פוליסה ותיק ניכויים</li>
       </ul>
-      <ul class="points" data-doc="payslip" hidden>
+      <ul class="points" data-doc="payslip other" hidden>
         <li>שם, מספר תעודת זהות ומספר עובד</li>
-        <li>כתובת</li>
+        <li>כתובת, טלפון ודוא"ל</li>
         <li>בנק, סניף ומספר חשבון</li>
         <li>שם בית הספר או המוסד, וסמל המוסד</li>
         <li>תאריך לידה, מצב משפחתי ופרטי בני משפחה</li>
-        <li>שם פקיד השכר, קודי QR ומספרי חשבון בקופות</li>
+        <li>שמות של אנשים אחרים: פקיד שכר, מנהל, חותם. גם קודי QR ומספרי חשבון בקופות</li>
       </ul>
       <p>המלבנים השחורים הם <strong>הצעה</strong> שלנו למה להסתיר. ההצעה עלולה לפספס פרט, ועלולה גם להסתיר יותר מדי.</p>
     </div>
     <div class="notice consent">
-      <p data-doc="pension"><strong>הסתרנו משהו שצריך לבדיקה?</strong> הבדיקה צריכה את ההפקדות, הסכומים, החודשים והתאריכים שלהן, דמי הניהול והיתרות. לחיצה על מלבן שחור מבטלת אותו, והוא נשאר מסומן במסגרת אדומה. לחיצה נוספת מחזירה אותו.</p>
+      <p data-doc="pension keren"><strong>הסתרנו משהו שצריך לבדיקה?</strong> הבדיקה צריכה את ההפקדות, הסכומים, החודשים והתאריכים שלהן, דמי הניהול והיתרות. לחיצה על מלבן שחור מבטלת אותו, והוא נשאר מסומן במסגרת אדומה. לחיצה נוספת מחזירה אותו.</p>
       <p data-doc="payslip" hidden><strong>הסתרנו משהו שצריך לבדיקה?</strong> הבדיקה צריכה את הסכומים, השעות, הדרגה והוותק, החודשים והתאריכים. לחיצה על מלבן שחור מבטלת אותו, והוא נשאר מסומן במסגרת אדומה. לחיצה נוספת מחזירה אותו.</p>
+      <p data-doc="other" hidden><strong>הסתרנו משהו שצריך לבדיקה?</strong> הבדיקה צריכה את הסכומים, התאריכים, הדרגה, הוותק והתפקידים שבמסמך. לחיצה על מלבן שחור מבטלת אותו, והוא נשאר מסומן במסגרת אדומה. לחיצה נוספת מחזירה אותו.</p>
       <p>מלבן שמכסה פרט שהקלדת (מספר הזהות, השם או מספר חשבון) נשאר תמיד.</p>
       <p><strong>נשאר פרט מזהה גלוי?</strong> מפעילים "סימון ידני" וגוררים עליו מלבן.</p>
     </div>
@@ -106,6 +122,7 @@
       <button id="next" class="primary" type="button" disabled>שליחה אלינו לבדיקה</button>
       <button id="save" type="button" disabled>שמירת עותק במחשב</button>
     </div>
+    <p class="hint" data-doc="pension keren other">בעמוד השליחה אפשר להוסיף עוד מסמכים לאותו תיק, לפני שלוחצים "הצפנה ושליחה".</p>
     <p class="hint" id="no-ticket" hidden>לשליחה צריך את קוד הכניסה שקיבלת ב-SMS. נבקש אותו בשלב הבא, והקובץ יחכה בדפדפן.</p>
   </section>
   <p class="footer-links"><a href="privacy.html">אבטחה ופרטיות</a> · <a href="terms.html">תנאי שימוש</a> · <a href="accessibility.html">הצהרת נגישות</a> · <a href="delete.html">מחיקה ובקשות</a></p>
