@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The key sits after the # and is never sent. no-referrer keeps the address out of any other request. -->
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://script.google.com/macros/s/AKfycbyGhnnzfXejxpYZVzX2U9uykm526udYM6G5hJUnQsLePHbiMElV_Y1z8CuSsRdPqZ1sxA/exec https://script.googleusercontent.com/macros/echo; img-src 'self'; form-action 'none'; base-uri 'none'">
+<title>קבלת הדוח</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brandbar"><img src="logo.svg" alt="" width="34" height="34"><span>בדיקת תלוש למורים</span></div>
+  <h1>קבלת הדוח</h1>
+  <p>הדוח נפתח כאן, במחשב שלך. המפתח שבקישור לא נשלח לשום מקום.</p>
+  <ol class="stepper" aria-label="שלבי הבדיקה"><li class="done"><a href="prepare.html">הכנה</a></li><li class="done"><a href="register.html">הרשמה</a></li><li class="done"><a href="index.html">כניסה</a></li><li class="done">ריקון התלוש</li><li class="done">שליחה</li><li aria-current="step">הדוח</li></ol>
+</header>
+<main>
+  <section id="ask" hidden>
+    <h2>הדביקי את הקישור ששמרת</h2>
+    <label>קישור הדוח
+      <input type="text" id="code" dir="ltr" autocomplete="off">
+    </label>
+    <button id="open" type="button">פתיחה</button>
+  </section>
+  <section>
+    <p id="status" role="status" aria-live="polite"></p>
+    <a class="button" id="save" hidden>הורדת הדוח</a>
+    <button id="again" type="button" hidden>בדיקה נוספת</button>
+    <p class="hint" id="scope" hidden>הדוח הוא דוח ממצאים. הוא לא ייעוץ משפטי או פנסיוני, והוא עלול לטעות ולפספס דברים. פרטים בראש הדוח.</p>
+    <div class="notice" id="resubmit-box" hidden>
+      <p><strong>זה דוח שגיאה.</strong> אפשר להעלות שוב עם הקוד שבדוח. הקובץ החדש ייכנס לאותו תיק, והדוח המלא יגיע לקישור הזה. אין צורך לשמור קישור חדש.</p>
+      <button id="resubmit" type="button" class="primary">העלאה חוזרת</button>
+    </div>
+    <p class="hint" id="erase-note" hidden>אחרי שהורדת את הדוח, אפשר <a id="erase" href="delete.html">למחוק מיד את התלוש והדוח מהשרת</a>. אחרת הם יימחקו אוטומטית בתום תקופת השמירה.</p>
+  </section>
+  <p class="footer-links"><a href="privacy.html">אבטחה ופרטיות</a> · <a href="terms.html">תנאי שימוש</a> · <a href="accessibility.html">הצהרת נגישות</a> · <a href="delete.html">מחיקה ובקשות</a></p>
+</main>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="crypto-box.js"></script>
+<script src="report.js"></script>
+</body>
+</html>

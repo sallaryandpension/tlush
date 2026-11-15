@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<!-- connect-src holds only the server's two addresses. There is deliberately no file field on this page: it can
+     send only what the blanking page handed over. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://script.google.com/macros/s/AKfycbyGhnnzfXejxpYZVzX2U9uykm526udYM6G5hJUnQsLePHbiMElV_Y1z8CuSsRdPqZ1sxA/exec https://script.googleusercontent.com/macros/echo; img-src 'self'; form-action 'none'; base-uri 'none'">
+<title>שליחת התלוש</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brandbar"><img src="logo.svg" alt="" width="34" height="34"><span>בדיקת תלוש למורים</span></div>
+  <h1>שליחת התלוש</h1>
+  <p>נשלח רק הקובץ בלי הפרטים המזהים, מוצפן. בלי שם, בלי מייל ובלי טלפון.</p>
+  <ol class="stepper" aria-label="שלבי הבדיקה"><li class="done"><a href="prepare.html">הכנה</a></li><li class="done"><a href="register.html">הרשמה</a></li><li class="done"><a href="index.html">כניסה</a></li><li class="done">ריקון התלוש</li><li aria-current="step">שליחה</li><li>הדוח</li></ol>
+</header>
+<main>
+  <p class="back-link" id="back"><a href="blank.html">→ חזרה לבחירת הקובץ (צריך לבחור אותו שוב)</a></p>
+  <section id="missing" hidden>
+    <h2 id="missing-title"></h2>
+    <p id="missing-text"></p>
+    <p><a id="missing-link" class="button" href="blank.html"></a></p>
+  </section>
+
+  <p class="notice" id="again-note" hidden><strong>העלאה חוזרת לאותו תיק.</strong> הקובץ החדש יחליף את הקודם, והדוח המלא יגיע לאותו קישור שכבר שמרת.</p>
+  <section id="step-code" hidden>
+    <h2 id="step-code-title">1. שמרי את קישור הדוח</h2>
+    <p>בקישור הזה תפתחי את הדוח כשיהיה מוכן. <strong>זו הדרך היחידה להגיע אליו.</strong> אנחנו לא יודעים של מי הדוח, ולכן לא נוכל לשלוח אותו שוב או לשחזר את הקישור.</p>
+    <p class="link-box" id="link" dir="ltr"></p>
+    <div class="actions">
+      <a class="button" id="by-mail" href="#">שלחי לעצמי במייל</a>
+      <a class="button" id="by-sms" href="#">שלחי לעצמי בהודעה</a>
+      <button id="share" type="button" hidden>שיתוף</button>
+      <button id="copy" type="button">העתקה</button>
+      <button id="download" type="button">הורדה</button>
+    </div>
+    <p id="copied" role="status" aria-live="polite"></p>
+    <canvas id="qr" class="qr" role="img" aria-label="קוד QR של קישור הדוח"></canvas>
+    <p class="hint">אפשר לצלם את הקוד בטלפון ולשמור אותו.</p>
+    <label class="check"><input type="checkbox" id="saved"> <span>שמרתי את הקישור. <span class="hint">כשתסמני, ייפתח דף נפרד עם הקישור וקוד ה-QR. משאירים אותו פתוח, וחוזרים ללשונית הזו כדי לשלוח.</span></span></label>
+    <p class="notice" id="keep-blocked" hidden>הדפדפן לא פתח דף נפרד. זה בסדר: אחרי השליחה הדף הזה יעבור בעצמו לדף עם הקישור וקוד ה-QR. עד אז הקישור מופיע כאן למעלה.</p>
+  </section>
+
+  <section id="step-send" hidden>
+    <h2>2. שליחה</h2>
+    <p id="summary"></p>
+    <p class="hint">ההצפנה והשליחה עשויות לקחת כמה דקות, ויותר בקובץ גדול או בחיבור איטי. לא לסגור את הלשונית עד שמופיע "נשלח".</p>
+    <button id="send" type="button" disabled>הצפנה ושליחה</button>
+    <div id="cancel-box">
+      <p class="hint">בחרת קובץ לא נכון? אפשר להוציא אותו או לבטל, כל עוד לא לחצת "הצפנה ושליחה".</p>
+      <div class="actions">
+        <button id="drop-payslip" type="button" hidden>הסרת התלושים מהשליחה</button>
+        <button id="drop-pension" type="button" hidden>הסרת הדוח מהקופה מהשליחה</button>
+        <button id="cancel" type="button">ביטול השליחה</button>
+      </div>
+    </div>
+    <progress id="progress" value="0" max="1" hidden></progress>
+    <p id="status" role="status" aria-live="polite"></p>
+    <button id="retry" type="button" hidden>נסי שוב</button>
+  </section>
+
+  <section id="done" hidden>
+    <h2>נשלח</h2>
+    <p>הקובץ התקבל. הדוח יהיה מוכן בתוך כמה ימים. כדי לראות אותו, היכנסי דרך הקישור ששמרת.</p>
+    <p><a id="done-keep" class="button" href="#">לדף עם הקישור וקוד ה-QR</a></p>
+  </section>
+  <p class="footer-links"><a href="privacy.html">אבטחה ופרטיות</a> · <a href="terms.html">תנאי שימוש</a> · <a href="accessibility.html">הצהרת נגישות</a> · <a href="delete.html">מחיקה ובקשות</a></p>
+</main>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="crypto-box.js"></script>
+<script src="handoff.js"></script>
+<script src="vendor/qrcode.js"></script>
+<script src="qr-draw.js"></script>
+<script src="send.js"></script>
+</body>
+</html>
