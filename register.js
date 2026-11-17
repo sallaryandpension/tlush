@@ -1,10 +1,13 @@
-/* The registration form. It collects consent and contact details only. There is no way to attach a file here. */
+/* The registration form. It collects consent and contact details only (name, phone, and an optional email since
+   17.11.2026). There is no way to attach a file here. */
 (function (global) {
   "use strict";
   const $ = (id) => document.getElementById(id);
   const C = global.CONSENT;
   const digits = (text) => text.replace(/\D/g, "");
   const validPhone = (text) => /^05\d{8}$/.test(digits(text));
+  // Optional (17.11.2026). The same rule as Code.gs; one field, not typed twice.
+  const validEmail = (text) => text.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text);
 
   function say(text, error) {
     $("status").textContent = text;
@@ -52,6 +55,8 @@
     if (!$("name").value.trim()) return "חסר שם.";
     if (!validPhone($("phone").value)) return "מספר הטלפון לא נראה כמו נייד ישראלי.";
     if (digits($("phone").value) !== digits($("phone2").value)) return "שני מספרי הטלפון לא זהים.";
+    const email = $("email").value.trim();
+    if (email && !validEmail(email)) return "כתובת הדוא\"ל לא נראית תקינה. אפשר גם להשאיר את השדה ריק.";
     return "";
   }
 
@@ -62,7 +67,7 @@
     say("שולחים...");
     try {
       const reply = await global.Api.call("register", {
-        name: $("name").value.trim(), phone: digits($("phone").value),
+        name: $("name").value.trim(), phone: digits($("phone").value), email: $("email").value.trim(),
         consentVersion: C.version, consentData: $("consent-data").checked, consentAi: !!C.consentAi && $("consent-ai").checked,
         website: $("website").value,
       });
