@@ -226,6 +226,10 @@ ul.points, ol.steps { margin: 0; padding-inline-start: 22px; }
 ul.points li, ol.steps li { margin-bottom: 10px; }
 ul.points li::marker { color: var(--accent); }
 ol.steps li::marker { color: var(--brand); font-weight: 700; }
+ol.toc { margin: 8px 0 0; padding-inline-start: 22px; columns: 2 220px; column-gap: 24px; }
+ol.toc li { margin-bottom: 4px; break-inside: avoid; }
+section[id] { scroll-margin-top: 12px; }
+label.check a { font-weight: 650; }
 .consent p { margin: 0 0 10px; }
 
 /* Tables (privacy page, and the local check page). */

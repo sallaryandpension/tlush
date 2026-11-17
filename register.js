@@ -11,6 +11,19 @@
     $("status").classList.toggle("error", !!error);
   }
 
+  /* Text with the phrases in CONSENT.links as links. Built from DOM nodes, never as HTML. A new tab keeps the form. */
+  function linked(text) {
+    return C.pieces(text).map((piece) => {
+      if (typeof piece === "string") return piece;
+      const a = document.createElement("a");
+      a.textContent = piece[0];
+      a.href = piece[1];
+      a.target = "_blank";
+      a.rel = "noopener";
+      return a;
+    });
+  }
+
   function showNotice() {
     const notice = $("notice");
     const heading = document.createElement("h2");
@@ -20,10 +33,10 @@
       const p = document.createElement("p");
       const strong = document.createElement("strong");
       strong.textContent = `${title}: `;
-      p.append(strong, text);
+      p.append(strong, ...linked(text));
       notice.append(p);
     }
-    $("consent-data-text").textContent = C.consentData;
+    $("consent-data-text").replaceChildren(...linked(C.consentData));
     $("consent-ai-text").textContent = C.consentAi || "";
     $("consent-ai-row").hidden = !C.consentAi;
     $("draft").hidden = !C.version.startsWith("DRAFT");

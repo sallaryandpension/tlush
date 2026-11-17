@@ -1,5 +1,5 @@
 /* The notice shown before registering. נוהל_ציות_משפטי.md, section 2, adapted to the blanked-file process.
-   Final since 15.11.2026: the operator reports the lawyer approved it. A version starting with DRAFT stops a public
+   Final since 17.11.2026: the operator reports the lawyer approved it. A version starting with DRAFT stops a public
    build (tools/build_site.py), and so does any placeholder in [brackets]. A change of wording needs a new version, because the registrants
    sheet records which version each teacher agreed to.
 
@@ -16,7 +16,15 @@
 (function (global) {
   "use strict";
   global.CONSENT = {
-    version: "2026-11-15-1",   // final: the operator reports the lawyer approved the texts (15.11.2026)
+    /* Final: the operator reports a lawyer approved this version and the rewritten privacy policy (17.11.2026).
+       Before it: 2026-11-15-1. */
+    version: "2026-11-17-1",
+    /* Phrases shown as links, opening in a new tab so the form keeps what was typed. register.js builds the links. */
+    links: [
+      ["מדיניות הפרטיות ואבטחת המידע", "privacy.html"],
+      ["תנאי השימוש", "terms.html"],
+      ["מחיקה ובקשות", "delete.html"],
+    ],
     title: "לפני הרישום",
     paragraphs: [
       ["מי אנחנו", "שירות \"בדיקת תלוש למורים\", באחריות שירותי בדיקת תלושים ופנסיה. פניות דרך עמוד \"מחיקה ובקשות\" באתר."],
@@ -27,11 +35,30 @@
       ["מה נשאר בקובץ", "הקובץ נשלח בלי שם, בלי מספר זהות, בלי כתובת ובלי פרטי בנק, אבל הסכומים נשארים בו, כי צריך אותם לבדיקה. לכן אי אפשר להבטיח אנונימיות מלאה."],
       ["מי בודק", "מפעיל השירות בודק את הקובץ וקורא כל דוח לפני שהוא נמסר לך. כרגע הקובץ לא מועבר למערכת בינה מלאכותית. אם זה ישתנה, נבקש ממך אישור נפרד לפני כן."],
       ["למי עוד יימסר המידע", "לאף אחד, אלא אם תבקשי זאת או שהחוק מחייב זאת."],
-      ["כמה זמן נשמור", "את הקובץ נמחק 90 ימים מיום השליחה. את הדוח נשמור 90 ימים מיום העלאתו. את פרטי הרישום נשמור 365 ימים מיום הרישום. אפשר לבקש מחיקה מוקדמת. הפירוט בעמוד \"אבטחה ופרטיות\"."],
+      ["כמה זמן נשמור", "את הקובץ נמחק 90 ימים מיום השליחה. את הדוח נשמור 90 ימים מיום העלאתו. את פרטי הרישום נשמור 365 ימים מיום הרישום. אפשר לבקש מחיקה מוקדמת. הפירוט ב\"מדיניות הפרטיות ואבטחת המידע\"."],
+      ["אבטחת המידע", "הקובץ מוצפן בדפדפן שלך לפני השליחה, והמפתח לפתיחתו נמצא רק במחשב של מפעיל השירות. קוד הכניסה נשמר רק בגיבוב. אין באתר עוגיות, אנליטיקה או סקריפטים של צד שלישי. הפירוט ב\"מדיניות הפרטיות ואבטחת המידע\"."],
       ["הזכויות שלך", "לעיין במידע שאנחנו מחזיקים עלייך, לבקש לתקן או למחוק אותו, ולחזור בך מההסכמה בכל שלב, בעמוד \"מחיקה ובקשות\". את התלוש והדוח אפשר למחוק שם בעצמך, מיד, בעזרת קישור הדוח. חזרה מהסכמה לא משפיעה על מה שכבר עובד."],
-      ["מה השירות הזה ומה הוא לא", "השירות משווה מסמכים לטבלאות, להסכמים ולחוזרים, ומחשב פערים. הוא לא ייעוץ משפטי ולא ייעוץ פנסיוני, הוא לא מייצג אותך, והוא לא פונה לאף גורם בשמך. הבדיקה עלולה לטעות ולפספס דברים. הדוח לא מחליף התייעצות עם ארגון המורים או עם עורך דין. התנאים המלאים בעמוד \"תנאי שימוש\"."],
+      ["מה השירות הזה ומה הוא לא", "השירות משווה מסמכים לטבלאות, להסכמים ולחוזרים, ומחשב פערים. הוא לא ייעוץ משפטי ולא ייעוץ פנסיוני, הוא לא מייצג אותך, והוא לא פונה לאף גורם בשמך. הבדיקה עלולה לטעות ולפספס דברים. הדוח לא מחליף התייעצות עם ארגון המורים או עם עורך דין. התנאים המלאים ב\"תנאי השימוש\"."],
     ],
-    consentData: "אני בן/בת 18 ומעלה, קראתי, ואני מסכים/ה לעיבוד הפרטים והקובץ למטרה הזו ולתנאי השימוש.",
+    consentData: "אני בן/בת 18 ומעלה, קראתי את מדיניות הפרטיות ואבטחת המידע ואת תנאי השימוש, ואני מסכים/ה לעיבוד הפרטים והקובץ למטרה הזו.",
     consentAi: null,
+  };
+
+  /* Splits a text into plain strings and [phrase, href] pairs, for every phrase in CONSENT.links. */
+  global.CONSENT.pieces = function (text) {
+    const out = [];
+    let rest = String(text || "");
+    while (rest) {
+      let best = null;
+      for (const [phrase, href] of global.CONSENT.links) {
+        const at = rest.indexOf(phrase);
+        if (at >= 0 && (!best || at < best.at)) best = { at, phrase, href };
+      }
+      if (!best) { out.push(rest); break; }
+      if (best.at) out.push(rest.slice(0, best.at));
+      out.push([best.phrase, best.href]);
+      rest = rest.slice(best.at + best.phrase.length);
+    }
+    return out;
   };
 })(window);
