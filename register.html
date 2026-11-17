@@ -12,7 +12,7 @@
 <header>
   <div class="brandbar"><img src="logo.svg" alt="" width="34" height="34"><span>בדיקת תלוש למורים</span></div>
   <h1>רישום לבדיקת תלוש</h1>
-  <p>נרשמים כאן, ומקבלים קוד כניסה ב-SMS. לא שולחים כאן תלוש.</p>
+  <p>נרשמים כאן, ומקבלים קוד כניסה במייל. לא שולחים כאן תלוש.</p>
   <ol class="stepper" aria-label="שלבי הבדיקה"><li class="done"><a href="prepare.html">הכנה</a></li><li aria-current="step"><a href="register.html">הרשמה</a></li><li><a href="index.html">כניסה</a></li><li>ריקון התלוש</li><li>שליחה</li><li>הדוח</li></ol>
 </header>
 <main>
@@ -24,14 +24,11 @@
       <label>שם
         <input type="text" id="name" autocomplete="name" maxlength="100">
       </label>
-      <label>טלפון נייד
-        <input type="tel" id="phone" dir="ltr" autocomplete="tel" inputmode="numeric" maxlength="14">
-      </label>
-      <label>טלפון נייד שוב
-        <input type="tel" id="phone2" dir="ltr" autocomplete="off" inputmode="numeric" maxlength="14">
-      </label>
-      <label>דוא"ל (רשות)
+      <label>דוא"ל
         <input type="email" id="email" dir="ltr" autocomplete="email" inputmode="email" maxlength="254">
+      </label>
+      <label>טלפון נייד (רשות)
+        <input type="tel" id="phone" dir="ltr" autocomplete="tel" inputmode="numeric" maxlength="14">
       </label>
       <div class="trap" aria-hidden="true">
         <label>אתר
@@ -46,7 +43,7 @@
   </section>
   <section id="done" hidden>
     <h2>קיבלנו</h2>
-    <p>קוד כניסה יישלח אליך ב-SMS. כשיגיע, אפשר <a href="index.html">להיכנס כאן</a>.</p>
+    <p>קוד כניסה יישלח אלייך במייל. כשיגיע, אפשר <a href="index.html">להיכנס כאן</a>. כדאי לבדוק גם בתיקיית הספאם.</p>
     <p>הקוד לא הגיע אחרי כמה שעות? <a href="index.html#nocode">לבקשת קוד חדש</a></p>
   </section>
   <p class="small-link">כבר יש לך קוד? <a href="index.html">לכניסה</a></p>

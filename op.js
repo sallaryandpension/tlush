@@ -1,4 +1,5 @@
-/* The operator's phone app: asks the server for three new entry codes and prepares the SMS. The codes are shown
+/* The operator's phone app: asks the server for three new entry codes and prepares the email (an SMS until
+   17.11.2026, when email became the way codes are sent; mailto opens the phone's mail app). The codes are shown
    only here and are not stored on the phone. The phone key, which can do nothing but make codes, is kept in this
    phone's storage; it arrives once after the # in the address from the cases window's QR code. */
 (function (global) {
@@ -29,7 +30,6 @@
   }
 
   const entryUrl = () => new URL("index.html", global.location.href).href;
-  const digits = (text) => text.replace(/\D/g, "");
 
   /* All three, or just one of them. */
   function message(only) {
@@ -39,11 +39,12 @@
     return [...lines, "", `נכנסים כאן: ${entryUrl()}`, only ? "הקוד תקף לשימוש אחד." : "כל קוד תקף לשימוש אחד."].join("\n");
   }
 
-  const smsLink = (text) => `sms:${digits($("phone").value)}?body=${encodeURIComponent(text)}`;
+  const SUBJECT = "קוד כניסה לבדיקת התלוש";
+  const mailLink = (text) => `mailto:${encodeURIComponent($("email").value.trim())}?subject=${encodeURIComponent(SUBJECT)}&body=${encodeURIComponent(text)}`;
 
-  function updateSms() {
-    $("sms").href = smsLink(message());
-    document.querySelectorAll("#codes a[data-code]").forEach((a) => { a.href = smsLink(message(a.dataset.code)); });
+  function updateMail() {
+    $("mail").href = mailLink(message());
+    document.querySelectorAll("#codes a[data-code]").forEach((a) => { a.href = mailLink(message(a.dataset.code)); });
   }
 
   async function make() {
@@ -63,13 +64,13 @@
           const send = document.createElement("a");
           send.className = "button";
           send.dataset.code = code;
-          send.textContent = "SMS עם הקוד הזה";
-          send.setAttribute("aria-label", `שליחת הקוד ה${["ראשון", "שני", "שלישי"][i] || ""} ב-SMS`);
+          send.textContent = "מייל עם הקוד הזה";
+          send.setAttribute("aria-label", `שליחת הקוד ה${["ראשון", "שני", "שלישי"][i] || ""} במייל`);
           li.append(text, send);
           list.append(li);
         });
         $("result").hidden = false;
-        updateSms();
+        updateMail();
         say("שלושה קודים חדשים מוכנים.");
       } else if (reply.error === "denied") {
         store.clear();
@@ -84,7 +85,7 @@
   }
 
   $("make").addEventListener("click", make);
-  $("phone").addEventListener("input", updateSms);
+  $("email").addEventListener("input", updateMail);
   $("copy").addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(message()); say("ההודעה הועתקה."); } catch (e) { say("ההעתקה לא הצליחה.", true); }
   });

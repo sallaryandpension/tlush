@@ -1,11 +1,10 @@
 /* The deletion and requests page. A case is deleted by its number, which only the teacher's link carries; the key
    after the dot never leaves the browser. A request about registration details waits for the operator, who confirms
-   it by SMS to that phone, so a stranger who knows a number can't act on it. */
+   it by email to that address, so a stranger who knows an address can't act on it (by email since 17.11.2026). */
 (function (global) {
   "use strict";
   const $ = (id) => document.getElementById(id);
   const C = global.CaseCrypto;
-  const digits = (text) => text.replace(/\D/g, "");
 
   function say(id, text, error) {
     $(id).textContent = text;
@@ -35,15 +34,15 @@
   }
 
   async function sendRequest() {
-    const phone = digits($("phone").value);
-    if (!/^05\d{8}$/.test(phone)) { say("request-status", "מספר הטלפון לא נראה כמו נייד ישראלי.", true); return; }
+    const email = $("email").value.trim();
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say("request-status", "כתובת הדוא\"ל לא נראית תקינה.", true); return; }
     $("request").disabled = true;
     say("request-status", "שולחים...");
     try {
-      const reply = await global.Api.call("request", { type: $("type").value, phone, website: $("website").value });
+      const reply = await global.Api.call("request", { type: $("type").value, email, website: $("website").value });
       if (reply.ok) {
-        $("phone").value = "";
-        say("request-status", "הבקשה התקבלה. נשלח לך SMS למספר הזה כדי לוודא שהיא ממך.");
+        $("email").value = "";
+        say("request-status", "הבקשה התקבלה. נשלח לך מייל לכתובת הזו כדי לוודא שהיא ממך.");
         return;
       }
       say("request-status", busy(reply) || "הבקשה לא התקבלה. בדקי את הפרטים ונסי שוב.", true);

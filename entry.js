@@ -32,17 +32,18 @@
     $("enter").disabled = false;
   }
 
-  /* "The code didn't arrive": a request in the operator's requests tab, and an alert. Only the phone is sent. */
+  /* "The code didn't arrive": a request in the operator's requests tab, and an alert. Only the email is sent (by
+     email since 17.11.2026; by phone before). */
   async function noCode() {
-    const phone = $("nocode-phone").value.replace(/\D/g, "");
+    const email = $("nocode-email").value.trim();
     const status = $("nocode-status");
     const tell = (text, error) => { status.textContent = text; status.classList.toggle("error", !!error); };
-    if (!/^05\d{8}$/.test(phone)) { tell("מספר הנייד לא נראה תקין.", true); return; }
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { tell("כתובת הדוא\"ל לא נראית תקינה.", true); return; }
     $("nocode-send").disabled = true;
     tell("שולחים...");
     try {
-      const reply = await global.Api.call("request", { type: "nocode", phone });
-      if (reply.ok) { tell("קיבלנו. קוד חדש יישלח אלייך ב-SMS למספר הזה."); return; }
+      const reply = await global.Api.call("request", { type: "nocode", email });
+      if (reply.ok) { tell("קיבלנו. קוד חדש יישלח אלייך במייל לכתובת הזו."); return; }
       tell(reply.error === "busy" ? "יש עומס. נסי שוב בעוד כמה דקות." : "הבקשה לא התקבלה. נסי שוב.", true);
     } catch (e) {
       tell("אין חיבור לשרת. נסי שוב מאוחר יותר.", true);
